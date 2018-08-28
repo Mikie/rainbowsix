@@ -23,6 +23,7 @@ public class ChargeCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
+			player.sendMessage("");
 			if (args.length >= 1) {
 				int amount = 1;
 				if (args.length >= 2) {
@@ -47,6 +48,7 @@ public class ChargeCommand implements CommandExecutor {
 					player.sendMessage(ChatColor.AQUA + "You were given an " + Charge.EXOTHERMIC.getName());
 				} else {
 					player.sendMessage(ChatColor.RED + "Wrong charge name '" + args[0] + "'");
+					return false;
 				}
 			} else {
 				player.sendMessage(ChatColor.RED + "Not enough arguments!");

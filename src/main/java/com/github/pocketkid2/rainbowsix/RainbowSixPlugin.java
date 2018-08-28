@@ -3,6 +3,7 @@ package com.github.pocketkid2.rainbowsix;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.github.pocketkid2.rainbowsix.commands.ChargeCommand;
+import com.github.pocketkid2.rainbowsix.listeners.ChargeListener;
 
 public class RainbowSixPlugin extends JavaPlugin {
 
@@ -26,8 +27,7 @@ public class RainbowSixPlugin extends JavaPlugin {
 	}
 
 	private void registerListeners() {
-		// TODO Auto-generated method stub
-
+		getServer().getPluginManager().registerEvents(new ChargeListener(this), this);
 	}
 
 	private void registerCommands() {
