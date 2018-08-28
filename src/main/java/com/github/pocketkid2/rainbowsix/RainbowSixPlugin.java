@@ -2,6 +2,8 @@ package com.github.pocketkid2.rainbowsix;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.github.pocketkid2.rainbowsix.commands.ChargeCommand;
+
 public class RainbowSixPlugin extends JavaPlugin {
 
 	@Override
@@ -29,8 +31,7 @@ public class RainbowSixPlugin extends JavaPlugin {
 	}
 
 	private void registerCommands() {
-		// TODO Auto-generated method stub
-
+		getCommand("charge").setExecutor(new ChargeCommand(this));
 	}
 
 	private void cancelTasks() {

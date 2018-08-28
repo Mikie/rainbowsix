@@ -2,3 +2,12 @@ name: ${name}
 version: ${version}
 main: ${groupId}.${artifactId}.${name}Plugin
 author: ${author}
+commands:
+    charge:
+        description: Give yourself breach charges
+        usage: /<command> <breach|exothermic> [amount]
+        permission: rainbowsix.charge
+permission:
+    rainbowsix.charge:
+        description: Permission to access the command
+        default: op
