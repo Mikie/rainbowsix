@@ -8,10 +8,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
@@ -149,11 +152,10 @@ public class ChargeListener implements Listener {
 
 	@EventHandler
 	public void onDetonateClick(PlayerInteractEvent event) {
-		if (Charge.isDetonator(event.getItem())) {
+		if ((event.getItem() != null) && Charge.isDetonator(event.getItem())) {
 			if (event.getAction() == Action.RIGHT_CLICK_AIR) {
 				ItemFrame frame = (ItemFrame) event.getPlayer().getMetadata("charge").stream()
 						.filter(key -> key.getOwningPlugin().equals(plugin)).findFirst().get().value();
-				ItemStack stack = event.getItem();
 				switchToCharge(frame, event.getPlayer(), Charge.getChargeFromFrameItem(frame.getItem()), true);
 				Charge.detonate(frame);
 				event.getPlayer().removeMetadata("charge", plugin);
@@ -161,6 +163,44 @@ public class ChargeListener implements Listener {
 			} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				event.setCancelled(true);
 				event.getPlayer().sendMessage(ChatColor.RED + "You cannot place the detonator!");
+			}
+		}
+	}
+
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		if (event.getPlayer().hasMetadata("charge")) {
+			ItemFrame frame = (ItemFrame) event.getPlayer().getMetadata("charge").stream()
+					.filter(key -> key.getOwningPlugin().equals(plugin)).findFirst().get().value();
+			switchToCharge(frame, event.getPlayer(), Charge.getChargeFromFrameItem(frame.getItem()), false);
+			frame.setItem(null);
+			frame.remove();
+			frame.removeMetadata("owner", plugin);
+			event.getPlayer().removeMetadata("charge", plugin);
+		}
+	}
+
+	@EventHandler
+	public void onPlayerDropDetonator(PlayerDropItemEvent event) {
+		if (Charge.isDetonator(event.getPlayer().getInventory().getItemInMainHand())) {
+			event.setCancelled(true);
+			event.getPlayer().sendMessage(ChatColor.RED + "Do not drop the detonator!");
+		}
+	}
+
+	@EventHandler
+	public void onPlayerDeath(EntityDamageEvent event) {
+		if (event.getEntityType() == EntityType.PLAYER) {
+			Player player = (Player) event.getEntity();
+			if (event.getFinalDamage() >= player.getHealth()) {
+				// The player died
+				ItemFrame frame = (ItemFrame) player.getMetadata("charge").stream().filter(key -> key.getOwningPlugin().equals(plugin))
+						.findFirst().get().value();
+				switchToCharge(frame, player, Charge.getChargeFromFrameItem(frame.getItem()), false);
+				frame.setItem(null);
+				frame.remove();
+				frame.removeMetadata("owner", plugin);
+				player.removeMetadata("charge", plugin);
 			}
 		}
 	}
