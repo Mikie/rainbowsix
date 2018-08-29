@@ -16,7 +16,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 public enum Charge {
 
 	BREACH(Material.ENDER_PEARL, ChatColor.GREEN + "Breach Charge", new HashSet<Material>(Arrays.asList(Material.WOOD))),
-	EXOTHERMIC(Material.EYE_OF_ENDER, ChatColor.GOLD + "Exothermic Charge", new HashSet<Material>(Arrays.asList(Material.IRON_BLOCK)));
+	EXOTHERMIC(
+			Material.EYE_OF_ENDER,
+			ChatColor.GOLD + "Exothermic Charge",
+			new HashSet<Material>(Arrays.asList(Material.WOOD, Material.IRON_BLOCK)));
 
 	private static final Material CHARGE_ITEM = Material.ITEM_FRAME;
 	private static final Material DETONATOR_ITEM = Material.TRIPWIRE_HOOK;
