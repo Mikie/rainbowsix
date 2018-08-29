@@ -57,18 +57,22 @@ public enum Charge {
 	}
 
 	public static boolean isCharge(ItemStack stack) {
-		for (Charge charge : Charge.values()) {
-			if ((stack.getType() == CHARGE_ITEM) && stack.getItemMeta().getDisplayName().equals(charge.name)) {
-				return true;
+		if (stack.getType() == CHARGE_ITEM) {
+			for (Charge charge : Charge.values()) {
+				if (stack.hasItemMeta() && stack.getItemMeta().getDisplayName().equals(charge.name)) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
 	public static Charge getCharge(ItemStack stack) {
-		for (Charge charge : Charge.values()) {
-			if ((stack.getType() == CHARGE_ITEM) && stack.getItemMeta().getDisplayName().equals(charge.name)) {
-				return charge;
+		if (stack.getType() == CHARGE_ITEM) {
+			for (Charge charge : Charge.values()) {
+				if (stack.getItemMeta().getDisplayName().equals(charge.name)) {
+					return charge;
+				}
 			}
 		}
 		return null;
@@ -76,6 +80,32 @@ public enum Charge {
 
 	public boolean canBreak(Material type) {
 		return breakable.contains(type);
+	}
+
+	public static ItemStack getFrameItem(Charge charge) {
+		ItemStack stack = new ItemStack(charge.item);
+		ItemMeta meta = stack.getItemMeta();
+		meta.setDisplayName(charge.name);
+		stack.setItemMeta(meta);
+		return stack;
+	}
+
+	public static boolean isFrameItem(ItemStack stack) {
+		for (Charge charge : Charge.values()) {
+			if ((stack.getType() == charge.item) && stack.getItemMeta().getDisplayName().equalsIgnoreCase(charge.name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static Charge getChargeFromFrameItem(ItemStack stack) {
+		for (Charge charge : Charge.values()) {
+			if ((stack.getType() == charge.item) && stack.getItemMeta().getDisplayName().equalsIgnoreCase(charge.name)) {
+				return charge;
+			}
+		}
+		return null;
 	}
 
 }
