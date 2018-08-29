@@ -34,7 +34,9 @@ public class ChargeCommand implements CommandExecutor {
 						return false;
 					}
 				}
-				if (args[0].equalsIgnoreCase("breach")) {
+				if (args[0].equalsIgnoreCase("clear")) {
+					player.removeMetadata("charge", plugin);
+				} else if (args[0].equalsIgnoreCase("breach")) {
 					// Give a breach charge
 					ItemStack stack = Charge.createCharge(Charge.BREACH);
 					stack.setAmount(amount);
