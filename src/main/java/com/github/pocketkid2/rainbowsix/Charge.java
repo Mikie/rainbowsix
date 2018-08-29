@@ -2,10 +2,14 @@ package com.github.pocketkid2.rainbowsix;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -67,6 +71,17 @@ public enum Charge {
 		return false;
 	}
 
+	public static boolean isDetonator(ItemStack stack) {
+		if (stack.getType() == DETONATOR_ITEM) {
+			for (Charge charge : Charge.values()) {
+				if (stack.hasItemMeta() && stack.getItemMeta().getDisplayName().equals(charge.name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public static Charge getCharge(ItemStack stack) {
 		if (stack.getType() == CHARGE_ITEM) {
 			for (Charge charge : Charge.values()) {
@@ -106,6 +121,54 @@ public enum Charge {
 			}
 		}
 		return null;
+	}
+
+	public static void detonate(ItemFrame frame) {
+		Block start = frame.getLocation().getBlock().getRelative(frame.getAttachedFace());
+		List<Block> destroy = new LinkedList<Block>();
+		destroy.add(start);
+		Charge charge = Charge.getChargeFromFrameItem(frame.getItem());
+
+		boolean xDirection;
+		switch (frame.getAttachedFace()) {
+		case EAST:
+		case WEST:
+			// Check in the X direction
+			xDirection = true;
+			break;
+		case NORTH:
+		case SOUTH:
+			// Check in the Z direction
+			xDirection = false;
+			break;
+		default:
+			return;
+		}
+
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if ((i != 0) || (j != 0)) {
+					Block block;
+					if (!xDirection) {
+						block = start.getRelative(i, j, 0);
+					} else {
+						block = start.getRelative(0, j, i);
+
+					}
+					if (charge.canBreak(block.getType())) {
+						destroy.add(block);
+					}
+				}
+			}
+		}
+
+		frame.setItem(null);
+		frame.remove();
+
+		for (Block block : destroy) {
+			block.setType(Material.AIR);
+			block.getWorld().createExplosion(block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5, 1.0f, false, false);
+		}
 	}
 
 }

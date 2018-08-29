@@ -6,6 +6,7 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
@@ -59,9 +60,23 @@ public class ChargeListener implements Listener {
 					setOwner(frame, event.getPlayer());
 					event.getPlayer().setMetadata("charge", new FixedMetadataValue(plugin, frame));
 					event.getPlayer().playSound(frame.getLocation(), Sound.BLOCK_METAL_PLACE, 1.0f, 1.0f);
+					// Switch to detonator
+					ItemStack det = Charge.createDetonator(charge);
+					det.setAmount(stack.getAmount());
+					event.getPlayer().getInventory().setItemInMainHand(det);
+					frame.setMetadata("det", new FixedMetadataValue(plugin, det));
 				}
 			}
 		}
+	}
+
+	private void switchToCharge(ItemFrame frame, Player player, Charge charge, boolean removeOne) {
+		ItemStack stack = (ItemStack) frame.getMetadata("det").stream().filter(key -> key.getOwningPlugin().equals(plugin)).findFirst()
+				.get().value();
+		ItemStack newStack = Charge.createCharge(charge);
+		newStack.setAmount(stack.getAmount() - (removeOne ? 1 : 0));
+		player.getInventory().remove(stack);
+		player.getInventory().addItem(newStack);
 	}
 
 	private void setOwner(ItemFrame frame, Player owner) {
@@ -84,6 +99,7 @@ public class ChargeListener implements Listener {
 			if (Charge.isFrameItem(frame.getItem())) {
 				Player owner = getOwner(frame);
 				owner.sendMessage(ChatColor.RED + "Your Breach Charge has been broken!");
+				switchToCharge(frame, owner, Charge.getChargeFromFrameItem(frame.getItem()), false);
 				owner.removeMetadata("charge", plugin);
 				frame.removeMetadata("owner", plugin);
 				frame.setItem(null);
@@ -103,7 +119,7 @@ public class ChargeListener implements Listener {
 					if (damager.equals(owner)) {
 						// Success
 						event.setCancelled(true);
-						owner.getInventory().addItem(Charge.createCharge(Charge.getChargeFromFrameItem(frame.getItem())));
+						switchToCharge(frame, owner, Charge.getChargeFromFrameItem(frame.getItem()), false);
 						frame.setItem(null);
 						frame.remove();
 						frame.removeMetadata("owner", plugin);
@@ -126,13 +142,27 @@ public class ChargeListener implements Listener {
 			ItemFrame frame = (ItemFrame) event.getRightClicked();
 			if (Charge.isFrameItem(frame.getItem())) {
 				event.getPlayer().sendMessage(ChatColor.RED + "Breach Charges cannot be modified!");
+				event.setCancelled(true);
 			}
 		}
 	}
 
 	@EventHandler
 	public void onDetonateClick(PlayerInteractEvent event) {
-
+		if (Charge.isDetonator(event.getItem())) {
+			if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+				ItemFrame frame = (ItemFrame) event.getPlayer().getMetadata("charge").stream()
+						.filter(key -> key.getOwningPlugin().equals(plugin)).findFirst().get().value();
+				ItemStack stack = event.getItem();
+				switchToCharge(frame, event.getPlayer(), Charge.getChargeFromFrameItem(frame.getItem()), true);
+				Charge.detonate(frame);
+				event.getPlayer().removeMetadata("charge", plugin);
+				event.getPlayer().sendMessage(ChatColor.YELLOW + "Charge Detonated!");
+			} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				event.setCancelled(true);
+				event.getPlayer().sendMessage(ChatColor.RED + "You cannot place the detonator!");
+			}
+		}
 	}
 
 }
