@@ -7,7 +7,14 @@ commands:
         description: Give yourself breach charges
         usage: /<command> <breach|exothermic> [amount]
         permission: rainbowsix.charge
+    rappel:
+        description: Give yourself the rappel item
+        usage: /<command>
+        permission: rainbowsix.rappel
 permission:
     rainbowsix.charge:
         description: Permission to access the command
+        default: op
+    rainbowsix.rappel:
+        description: Permission to use the command
         default: op

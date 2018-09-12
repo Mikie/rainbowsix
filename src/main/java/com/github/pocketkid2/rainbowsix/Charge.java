@@ -129,40 +129,13 @@ public enum Charge {
 	public static void detonate(ItemFrame frame) {
 		Block start = frame.getLocation().getBlock().getRelative(frame.getAttachedFace());
 		List<Block> destroy = new LinkedList<Block>();
-		destroy.add(start);
+
 		Charge charge = Charge.getChargeFromFrameItem(frame.getItem());
 
-		boolean xDirection;
-		switch (frame.getAttachedFace()) {
-		case EAST:
-		case WEST:
-			// Check in the X direction
-			xDirection = true;
-			break;
-		case NORTH:
-		case SOUTH:
-			// Check in the Z direction
-			xDirection = false;
-			break;
-		default:
-			return;
-		}
-
-		for (int i = -1; i <= 1; i++) {
-			for (int j = -1; j <= 1; j++) {
-				if ((i != 0) || (j != 0)) {
-					Block block;
-					if (!xDirection) {
-						block = start.getRelative(i, j, 0);
-					} else {
-						block = start.getRelative(0, j, i);
-
-					}
-					if (charge.canBreak(block.getType())) {
-						destroy.add(block);
-					}
-				}
-			}
+		destroy.add(start);
+		Block under = start.getRelative(0, -1, 0);
+		if (charge.canBreak(under.getType())) {
+			destroy.add(under);
 		}
 
 		frame.setItem(null);
