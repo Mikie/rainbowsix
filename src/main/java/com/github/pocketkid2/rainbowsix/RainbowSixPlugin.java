@@ -7,11 +7,18 @@ import com.github.pocketkid2.rainbowsix.listeners.ChargeListener;
 
 public class RainbowSixPlugin extends JavaPlugin {
 
+	private static RainbowSixPlugin instance;
+
+	public static RainbowSixPlugin getInstance() {
+		return instance;
+	}
+
 	@Override
 	public void onEnable() {
 		registerCommands();
 		registerListeners();
 		registerRecipes();
+		instance = this;
 		getLogger().info("Done!");
 	}
 
